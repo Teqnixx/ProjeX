@@ -12,8 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 import Link from "next/link";
 
 export default function LoginPage() {
-  const session = useSession(); // ✅ Don't destructure yet
-  const { data, status } = session;
+  const { data: session, status } = useSession(); // ✅ Fixed destructuring
   const router = useRouter();
   const { toast } = useToast();
 
@@ -22,16 +21,17 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (status === "authenticated") {
-      router.push("/dashboard"); // Redirect if logged in
+    if (status === "authenticated" && session) {
+      router.push("/dashboard"); // ✅ Ensures session is valid before redirecting
     }
-  }, [status, router]);
+  }, [status, session, router]);
 
   const handleLogin = async () => {
     if (!email || !password) {
       toast({
         title: "Error",
         description: "Email and password cannot be empty.",
+        variant: "destructive",
       });
       return;
     }
@@ -40,7 +40,7 @@ export default function LoginPage() {
     const result = await signIn("credentials", {
       email,
       password,
-      redirect: false,
+      redirect: false, // Prevents default redirect
     });
 
     if (result?.error) {
@@ -50,7 +50,7 @@ export default function LoginPage() {
         variant: "destructive",
       });
     } else {
-      router.push("/dashboard"); // Redirect after successful login
+      router.push("/dashboard"); // ✅ Redirect on success
     }
     setLoading(false);
   };
@@ -64,11 +64,11 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex items-center justify-center w-[400px]">
-      <Card className="w-full max-w-lg shadow-lg">
+    <div className="flex items-center justify-center min-h-screen">
+      <Card className="w-[400px] max-w-lg shadow-lg">
         <CardHeader className="text-center">
           <CardTitle className="text-2xl font-bold">
-            {status === "authenticated" ? `Welcome, ${data.user?.name}` : "Welcome to ProjeX"}
+            {status === "authenticated" ? `Welcome, ${session?.user?.name}` : "Welcome to ProjeX"}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -104,7 +104,7 @@ export default function LoginPage() {
                 variant="outline"
                 className="w-full flex items-center justify-center gap-2 mt-2"
                 onClick={() => signIn("google")}
-                disabled={loading}
+                disabled={loading} // ✅ Prevent double-clicks while loading
               >
                 <FcGoogle size={20} />
                 Continue with Google
