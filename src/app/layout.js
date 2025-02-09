@@ -1,4 +1,6 @@
 import { Geist, Geist_Mono } from "next/font/google";
+import Provider from "@/components/SessionProvider";
+import { RegistrationProvider } from "@/context/RegistrationContext";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -22,7 +24,11 @@ export default function RootLayout({ children }) {
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased h-full`}
       >
-        {children}
+        <RegistrationProvider>
+          <Provider>
+            {children}
+          </Provider>
+        </RegistrationProvider>
       </body>
     </html>
   );
