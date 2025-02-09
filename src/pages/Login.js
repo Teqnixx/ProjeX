@@ -1,18 +1,19 @@
 "use client";
 
-import { useState } from "react";
-import { signIn, signOut, useSession } from "next-auth/react";
+import { useSession, signIn, signOut } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import { FcGoogle } from "react-icons/fc";
-import { useRouter } from "next/navigation";
-import { useToast } from "@/hooks/use-toast"; // ✅ Fixed Import
+import { useToast } from "@/hooks/use-toast";
 import Link from "next/link";
 
 export default function LoginPage() {
-  const { data: session, status } = useSession();
+  const session = useSession(); // ✅ Don't destructure yet
+  const { data, status } = session;
   const router = useRouter();
   const { toast } = useToast();
 
@@ -20,12 +21,17 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
+  useEffect(() => {
+    if (status === "authenticated") {
+      router.push("/dashboard"); // Redirect if logged in
+    }
+  }, [status, router]);
+
   const handleLogin = async () => {
     if (!email || !password) {
       toast({
         title: "Error",
         description: "Email and password cannot be empty.",
-        variant: "destructive",
       });
       return;
     }
@@ -58,15 +64,15 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex items-center justify-center min-h-screen">
-      <Card className="w-full max-w-md shadow-lg"> {/* ✅ Better Width */}
+    <div className="flex items-center justify-center w-[400px]">
+      <Card className="w-full max-w-lg shadow-lg">
         <CardHeader className="text-center">
           <CardTitle className="text-2xl font-bold">
-            {session ? `Welcome, ${session.user?.name}` : "Welcome to ProjeX"}
+            {status === "authenticated" ? `Welcome, ${data.user?.name}` : "Welcome to ProjeX"}
           </CardTitle>
         </CardHeader>
         <CardContent>
-          {!session ? (
+          {status !== "authenticated" ? (
             <>
               <div className="space-y-4">
                 <Input
