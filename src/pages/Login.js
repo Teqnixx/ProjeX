@@ -12,7 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 import Link from "next/link";
 
 export default function LoginPage() {
-  const { data: session, status } = useSession(); // ✅ Fixed destructuring
+  const { data: session, status } = useSession(); // ✅ Ensure session is always defined
   const router = useRouter();
   const { toast } = useToast();
 
@@ -21,10 +21,10 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (status === "authenticated" && session) {
-      router.push("/dashboard"); // ✅ Ensures session is valid before redirecting
+    if (status === "authenticated") {
+      router.push("/dashboard"); // Redirect if already logged in
     }
-  }, [status, session, router]);
+  }, [status, router]);
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -40,7 +40,7 @@ export default function LoginPage() {
     const result = await signIn("credentials", {
       email,
       password,
-      redirect: false, // Prevents default redirect
+      redirect: false,
     });
 
     if (result?.error) {
@@ -50,7 +50,7 @@ export default function LoginPage() {
         variant: "destructive",
       });
     } else {
-      router.push("/dashboard"); // ✅ Redirect on success
+      router.push("/dashboard"); // Redirect after successful login
     }
     setLoading(false);
   };
@@ -64,8 +64,8 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex items-center justify-center min-h-screen">
-      <Card className="w-[400px] max-w-lg shadow-lg">
+    <div className="flex items-center justify-center min-h-screen w-full">
+      <Card className="w-[400px] shadow-lg">
         <CardHeader className="text-center">
           <CardTitle className="text-2xl font-bold">
             {status === "authenticated" ? `Welcome, ${session?.user?.name}` : "Welcome to ProjeX"}
@@ -104,7 +104,7 @@ export default function LoginPage() {
                 variant="outline"
                 className="w-full flex items-center justify-center gap-2 mt-2"
                 onClick={() => signIn("google")}
-                disabled={loading} // ✅ Prevent double-clicks while loading
+                disabled={loading}
               >
                 <FcGoogle size={20} />
                 Continue with Google
