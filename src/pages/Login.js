@@ -8,19 +8,28 @@ import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import { FcGoogle } from "react-icons/fc";
 import { useRouter } from "next/navigation";
-import { useToast } from "@/hooks/use-toast"
+import { useToast } from "@/hooks/use-toast"; // ✅ Fixed Import
 import Link from "next/link";
 
 export default function LoginPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
-  const { toast } = useToast()
+  const { toast } = useToast();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleLogin = async () => {
+    if (!email || !password) {
+      toast({
+        title: "Error",
+        description: "Email and password cannot be empty.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setLoading(true);
     const result = await signIn("credentials", {
       email,
@@ -28,14 +37,6 @@ export default function LoginPage() {
       redirect: false,
     });
 
-    if (!email || !password) {
-      toast({
-        title: "Error",
-        description: "Email and password cannot be empty.",
-      });
-      return;
-    }
-    
     if (result?.error) {
       toast({
         title: "Login Failed",
@@ -57,8 +58,8 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex items-center justify-center w-[400px]">
-      <Card className="w-full max-w-lg shadow-lg">
+    <div className="flex items-center justify-center min-h-screen">
+      <Card className="w-full max-w-md shadow-lg"> {/* ✅ Better Width */}
         <CardHeader className="text-center">
           <CardTitle className="text-2xl font-bold">
             {session ? `Welcome, ${session.user?.name}` : "Welcome to ProjeX"}
